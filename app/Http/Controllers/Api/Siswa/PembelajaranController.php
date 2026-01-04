@@ -47,14 +47,20 @@ class PembelajaranController extends Controller
     public function downloadModul($modul_id)
     {
         $modul = Modul::findOrFail($modul_id);
-        
-        // Cek logic akses (apakah siswa enrolled di kelas modul ini)
-        // ... (Logic cek enrollment sama seperti di atas)
 
-        if (Storage::exists($modul->file_path)) {
+        $isEnrolled = Enrollment::where('user_id', Auth::id())
+            ->where('kelas_id', $modul->kelas_id)
+            ->exists();
+        if (!$isEnrolled) {
+            return response()->json(['message' => 'Akses ditolak.'], 403);
+        }
+
+        if ($modul->file_path && Storage::exists($modul->file_path)) {
             return Storage::download($modul->file_path, $modul->judul);
         }
 
-        return response()->json(['message' => 'File tidak ditemukan'], 404);
+        return response()->json([
+            'message' => 'File modul tidak tersedia atau belum diunggah oleh tentor.'
+        ], 404);
     }
 }

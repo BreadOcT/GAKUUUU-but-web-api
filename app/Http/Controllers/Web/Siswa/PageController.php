@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Web\Siswa;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;     // <--- Wajib untuk password
-use App\Models\User;                     // <--- YANG HILANG (Penyebab Error)
-use App\Models\UserData;                 // <--- Wajib untuk profil
+use Illuminate\Support\Facades\Hash;     
+use App\Models\User;                     
+use App\Models\UserData;                 
 use App\Models\Matakuliah;
 use App\Models\Enrollment;
 use App\Models\Kelas;
@@ -16,7 +16,7 @@ use App\Models\Tugas;
 use App\Models\Pengumpulan;
 use App\Models\Testimoni;
 use App\Models\KontakCs;
-use Illuminate\Support\Facades\Storage;  // <--- Wajib untuk upload file
+use Illuminate\Support\Facades\Storage;  
 
 class PageController extends Controller
 {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Models\UserData;
 use Illuminate\Http\Request;
@@ -74,5 +75,48 @@ class AuthController extends Controller
     {
         Auth::user()->tokens()->delete();
         return response()->json(['message' => 'Logout berhasil']);
+    }
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'last_name'  => 'nullable|string|max:255',
+            'no_telepon' => 'nullable|string|max:20',
+            'alamat_lengkap' => 'nullable|string|max:500',
+            'foto_profil' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $userData = $user->userData;
+        
+        if (!$userData) {
+            $userData = new UserData();
+            $userData->user_id = $user->id;
+        }
+
+        if ($request->hasFile('foto_profil')) {
+            if ($userData->foto_profil && Storage::disk('public')->exists($userData->foto_profil)) {
+                Storage::disk('public')->delete($userData->foto_profil);
+            }
+            $path = $request->file('foto_profil')->store('profil', 'public');
+            $userData->foto_profil = $path;
+        }
+
+        $userData->first_name = $request->first_name;
+        $userData->last_name = $request->last_name;
+        $userData->no_telepon = $request->no_telepon;
+        $userData->alamat_lengkap = $request->alamat_lengkap;
+        
+        $userData->save();
+
+        return response()->json([
+            'message' => 'Profil berhasil diperbarui',
+            'data' => $user->load('userData')
+        ]);
     }
 }

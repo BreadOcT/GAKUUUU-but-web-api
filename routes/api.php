@@ -42,9 +42,12 @@ Route::middleware(['auth:sanctum', 'role:siswa'])->group(function () {
     // Cek Nilai (Transkrip)
     Route::get('/nilai', [TugasController::class, 'rekapNilai']);
 
-    // --- UTILITAS (FR-15, FR-17, Use Case 4.5) ---
-    // Kirim Feedback/Testimoni
+    // --- UTILITAS (FR-15, FR-17) ---
+    // Kirim Testimoni (Rating)
     Route::post('/feedback', [FeedbackController::class, 'store']);
+
+    // Kirim Keluhan ke CS (Complaint)
+    Route::post('/kontak-cs', [FeedbackController::class, 'kirimKeluhan']);
     // Update Profil Siswa
     Route::put('/profile', [AuthController::class, 'updateProfile']);
 });

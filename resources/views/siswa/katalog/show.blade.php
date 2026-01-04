@@ -34,7 +34,7 @@
                     @if($matakuliah->kelas->isEmpty())
                         <div class="alert alert-warning small">Belum ada kelas dibuka untuk mata kuliah ini.</div>
                     @else
-                        <form action="#" method="POST"> 
+                       <form action="{{ route('siswa.enrollment.store') }}" method="POST">
                             @csrf
                             <input type="hidden" name="matakuliah_id" value="{{ $matakuliah->id }}">
                             
@@ -44,9 +44,9 @@
                                     <input class="form-check-input flex-shrink-0" type="radio" name="kelas_id" value="{{ $kelas->id }}" required>
                                     <span>
                                         <strong class="d-block">{{ $kelas->nama_kelas }}</strong>
-                                        <small class="text-muted d-block">
+                                        <small class="text-muted">
                                             @foreach($kelas->jadwal as $jadwal)
-                                                <i class="far fa-clock"></i> {{ $jadwal->hari }}, {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}<br>
+                                                {{ $jadwal->hari }}, {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}<br>
                                             @endforeach
                                         </small>
                                     </span>

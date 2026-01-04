@@ -11,7 +11,7 @@
                 <div class="card-body">
                     <p class="text-muted">Bagaimana pengalaman belajar Anda di Gaku!? Masukan Anda sangat berarti bagi kami.</p>
                     
-                    <form action="{{ url('/api/feedback') }}" method="POST">
+                    <form action="{{ route('siswa.feedback.store') }}" method="POST">
                         @csrf
                         
                         <div class="mb-4 text-center">

@@ -71,13 +71,15 @@
                             <i class="fas fa-exclamation-triangle me-1"></i> Anda belum mengumpulkan tugas ini.
                         </div>
 
-                        <form action="#" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('siswa.tugas.store', $tugas->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
+                            
                             <div class="mb-3">
                                 <label for="file_jawaban" class="form-label fw-bold">Upload Jawaban (PDF/DOCX)</label>
                                 <input class="form-control" type="file" id="file_jawaban" name="file_jawaban" required>
                                 <div class="form-text">Maksimal ukuran file 5MB.</div>
                             </div>
+                            
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-upload me-2"></i> Upload Tugas
                             </button>

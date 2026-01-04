@@ -11,7 +11,7 @@
                 <div class="card-body">
                     <p class="text-muted">Mengalami kendala teknis atau masalah pembayaran? Laporkan di sini.</p>
                     
-                    <form action="{{ url('/api/kontak-cs') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('siswa.kontak-cs.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         
                         <div class="mb-3">

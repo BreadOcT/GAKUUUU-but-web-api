@@ -14,10 +14,12 @@ class JadwalKelasFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
+    public function definition()
     {
         return [
-            //
+            'hari' => $this->faker->dayOfWeek(), // Senin, Selasa...
+            'jam_mulai' => $this->faker->time('H:i'),
+            'jam_selesai' => $this->faker->time('H:i'),
         ];
     }
 }

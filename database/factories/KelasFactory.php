@@ -14,10 +14,11 @@ class KelasFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
+    public function definition()
     {
         return [
-            //
+            'nama_kelas' => 'Kelas ' . $this->faker->randomElement(['A', 'B', 'C']) . ' - ' . $this->faker->randomElement(['Pagi', 'Siang', 'Sore']),
+            'deskripsi' => 'Kelas intensif untuk persiapan ujian.',
         ];
     }
 }

@@ -14,10 +14,15 @@ class UserDataFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
+    public function definition()
     {
         return [
-            //
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'no_telepon' => $this->faker->phoneNumber(),
+            'alamat_lengkap' => $this->faker->address(),
+            'kota' => $this->faker->city(),
+            'negara' => 'Indonesia',
         ];
     }
 }

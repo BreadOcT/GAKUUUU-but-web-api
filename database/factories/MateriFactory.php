@@ -14,10 +14,12 @@ class MateriFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
+    public function definition()
     {
         return [
-            //
+            'judul' => 'Materi: ' . $this->faker->words(3, true),
+            'deskripsi' => $this->faker->paragraph(),
+            'tanggal_upload' => now(),
         ];
     }
 }

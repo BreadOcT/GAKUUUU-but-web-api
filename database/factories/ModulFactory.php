@@ -14,10 +14,11 @@ class ModulFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
+    public function definition()
     {
         return [
-            //
+            'judul' => 'Bab ' . $this->faker->randomDigitNotNull() . ': ' . $this->faker->words(3, true),
+            'deskripsi' => $this->faker->sentence(),
         ];
     }
 }

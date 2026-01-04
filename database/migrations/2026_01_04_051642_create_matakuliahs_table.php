@@ -9,10 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        Schema::create('matakuliahs', function (Blueprint $table) {
+        Schema::create('matakuliah', function (Blueprint $table) {
             $table->id();
+            // pengampu_id merujuk ke users (role tentor)
+            $table->foreignId('pengampu_id')->constrained('users')->onDelete('cascade'); 
+            $table->string('nama_mk');
+            $table->text('deskripsi');
+            $table->text('manfaat')->nullable();
+            $table->text('tujuan')->nullable();
             $table->timestamps();
         });
     }

@@ -9,9 +9,15 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        //
+        Schema::create('testimoni', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->text('komentar');
+            $table->integer('rating'); // 1-5
+            $table->timestamps();
+        });
     }
 
     /**

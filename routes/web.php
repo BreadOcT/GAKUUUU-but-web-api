@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\Siswa\PageController;
 
+
 // Halaman Depan (Landing Page)
 Route::get('/', function () { return view('welcome'); });
 
@@ -10,6 +11,7 @@ Route::get('/', function () { return view('welcome'); });
 // Menampilkan Form Login & Register
 Route::get('/login', [PageController::class, 'showLogin'])->name('login');
 Route::get('/register', [PageController::class, 'showRegister'])->name('register');
+Route::post('/logout', [PageController::class, 'logout'])->middleware('auth')->name('logout');
 
 // Proses Login/Register biasanya ditangani controller yang sama dengan API 
 // atau controller khusus web yang me-return redirect, bukan JSON.
@@ -45,4 +47,10 @@ Route::middleware(['auth:web', 'role:siswa'])->prefix('siswa')->name('siswa.')->
     
     // Menampilkan Halaman Edit Profile (View: siswa.profile.edit)
     Route::get('/profile', [PageController::class, 'editProfile'])->name('profile.edit');
+
+    Route::put('/profile', [PageController::class, 'updateProfile'])->name('profile.update');
+
+    // Di dalam group prefix('siswa')
+    Route::get('/feedback', [PageController::class, 'createFeedback'])->name('feedback.create');
+    Route::get('/kontak-cs', [PageController::class, 'createKontakCs'])->name('kontak-cs.create');
 });

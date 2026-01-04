@@ -113,7 +113,7 @@ class PageController extends Controller
 
         // (Opsional) Tambahkan logika cek enrollment lagi di sini untuk keamanan ganda
 
-        return view('siswa.materi.show', compact('materi'));
+        return view('siswa.kelas.materi', compact('materi'));
     }
 
     // --- TUGAS & PENGUMPULAN ---
@@ -159,6 +159,25 @@ class PageController extends Controller
     public function editProfile()
     {
         $user = Auth::user()->load('userData');
-        return view('siswa.profile.edit', compact('user'));
+        return view('siswa.utilitas.profile', compact('user'));
+    }
+
+    /**
+     * Memproses Logout User (Web).
+     * Menghapus sesi, regenerasi token CSRF, dan redirect ke halaman login.
+     */
+    public function logout(Request $request)
+    {
+        // 1. Proses Logout via Auth Facade
+        Auth::logout();
+ 
+        // 2. Invalidate Session (Agar sesi lama tidak bisa dipakai lagi)
+        $request->session()->invalidate();
+ 
+        // 3. Regenerate Token (Mencegah serangan CSRF)
+        $request->session()->regenerateToken();
+ 
+        // 4. Redirect kembali ke halaman login
+        return redirect('/login');
     }
 }

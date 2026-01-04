@@ -3,70 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gaku! - Bimbingan Belajar Online</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Gaku! - Siswa Panel</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
     <style>
         body { background-color: #f8f9fa; }
-        .sidebar { min-height: 100vh; background-color: #343a40; color: white; }
-        .sidebar a { color: #cfd2d6; text-decoration: none; padding: 10px 15px; display: block; }
-        .sidebar a:hover, .sidebar a.active { background-color: #495057; color: white; }
-        .card { border: none; shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); }
+        
+        /* Sidebar Styling */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 48px 0 0;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+            background-color: #343a40;
+        }
+        
+        .sidebar-sticky {
+            position: relative;
+            top: 0;
+            height: calc(100vh - 48px);
+            padding-top: .5rem;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* Adjust Main Content to sit right of sidebar */
+        main {
+            padding-top: 20px;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 767.98px) {
+            .sidebar {
+                position: static;
+                height: auto;
+                padding-top: 0;
+            }
+            main {
+                padding-top: 10px;
+            }
+        }
     </style>
 </head>
 <body>
 
+<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow d-md-none">
+    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">Gaku!</a>
+    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</header>
+
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-3 col-lg-2 px-0 sidebar collapse d-md-block" id="sidebarMenu">
-            <div class="p-3 text-center border-bottom border-secondary">
-                <h4 class="mb-0 fw-bold"><i class="fas fa-graduation-cap"></i> Gaku!</h4>
-                <small>Siswa Panel</small>
-            </div>
-            <ul class="nav flex-column mt-3">
-                <li class="nav-item">
-                    <a href="{{ route('siswa.dashboard') }}" class="{{ request()->routeIs('siswa.dashboard') ? 'active' : '' }}">
-                        <i class="fas fa-home me-2"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('siswa.katalog.index') }}" class="{{ request()->routeIs('siswa.katalog.*') ? 'active' : '' }}">
-                        <i class="fas fa-book-open me-2"></i> Katalog Mata Kuliah
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('siswa.nilai.index') }}" class="{{ request()->routeIs('siswa.nilai.*') ? 'active' : '' }}">
-                        <i class="fas fa-chart-bar me-2"></i> Riwayat Nilai
-                    </a>
-                </li>
-                <li class="nav-item mt-4 border-top border-secondary pt-2">
-                    <a href="{{ route('siswa.profile.edit') }}" class="{{ request()->routeIs('siswa.profile.*') ? 'active' : '' }}">
-                        <i class="fas fa-user-cog me-2"></i> Profil Saya
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <form action="#" method="POST" class="d-inline">
-                        @csrf 
-                        <button type="submit" class="btn btn-link text-start w-100 text-decoration-none" style="color: #cfd2d6; padding: 10px 15px;">
-                            <i class="fas fa-sign-out-alt me-2"></i> Logout
-                        </button>
-                    </form>
-                </li>
-            </ul>
-        </div>
+        
+        @include('layouts.siswa_sidebar')
 
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-            <nav class="navbar navbar-light bg-light d-md-none mb-3 rounded shadow-sm">
-                <div class="container-fluid">
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <span class="navbar-brand mb-0 h1">Gaku!</span>
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 mb-5">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-            </nav>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
 
             @yield('content')
-            
         </main>
     </div>
 </div>

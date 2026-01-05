@@ -79,5 +79,21 @@ class DatabaseSeeder extends Seeder
                 'komentar_tentor' => 'Kerja bagus, pertahankan!',
             ]);
         }
+
+        // 0. BUAT AKUN ADMIN
+        $admin = User::create([
+            'username' => 'admin_gaku',
+            'email' => 'admin@gaku.com',
+            'password' => bcrypt('password'), // Password: password
+            'role' => 'admin',
+            'aktif' => true,
+        ]);
+        
+        UserData::create([
+            'user_id' => $admin->id,
+            'first_name' => 'Super',
+            'last_name' => 'Admin',
+            'no_telepon' => '081234567890',
+        ]);
     }
 }

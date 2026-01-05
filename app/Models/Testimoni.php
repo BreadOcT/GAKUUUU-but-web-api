@@ -11,7 +11,7 @@ class Testimoni extends Model
 
     protected $table = 'testimoni';
 
-    protected $fillable = ['user_id', 'komentar', 'rating'];
+    protected $fillable = ['user_id', 'komentar', 'rating', 'status'];
 
     public function user()
     {

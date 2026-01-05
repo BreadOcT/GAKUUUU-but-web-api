@@ -63,7 +63,11 @@
 <div class="container-fluid">
     <div class="row">
         
-        @include('layouts.siswa_sidebar')
+        @if(Auth::check() && Auth::user()->role == 'admin')
+            @include('layouts.admin_sidebar')
+        @else
+            @include('layouts.siswa_sidebar')
+        @endif
 
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 mb-5">
             @if(session('success'))

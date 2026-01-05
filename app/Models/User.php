@@ -15,8 +15,8 @@ class User extends Authenticatable
         'username',
         'email',
         'password',
-        'role',     // 'admin', 'tentor', 'siswa'
-        'aktif',
+        'role',
+        'aktif', // <--- TAMBAHKAN INI (Wajib untuk Admin memverifikasi/memblokir user)
     ];
 
     protected $hidden = [
@@ -24,27 +24,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    // Relasi ke Data Diri (One-to-One)
-    public function userData()
-    {
-        return $this->hasOne(UserData::class);
-    }
-
-    // Relasi Siswa: Enrollment (Kelas yang diambil)
-    public function enrollments()
-    {
-        return $this->hasMany(Enrollment::class);
-    }
-
-    // Relasi Siswa: Pengumpulan Tugas
-    public function pengumpulan()
-    {
-        return $this->hasMany(Pengumpulan::class);
-    }
-    
-    // Relasi Tentor: Mata Kuliah yang diampu
-    public function matakuliahDiampu()
-    {
-        return $this->hasMany(Matakuliah::class, 'pengampu_id');
-    }
+    // ... relasi userData, enrollments, matakuliahDiampu (biarkan) ...
+    public function userData() { return $this->hasOne(UserData::class); }
+    public function enrollments() { return $this->hasMany(Enrollment::class); }
+    public function pengumpulan() { return $this->hasMany(Pengumpulan::class); }
+    public function matakuliahDiampu() { return $this->hasMany(Matakuliah::class, 'pengampu_id'); }
+    public function testimoni() { return $this->hasMany(Testimoni::class); }
+    public function kontakCs() { return $this->hasMany(KontakCs::class); }
 }

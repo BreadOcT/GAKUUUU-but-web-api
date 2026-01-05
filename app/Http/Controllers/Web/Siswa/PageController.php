@@ -30,24 +30,40 @@ class PageController extends Controller
         return view('auth.register');
     }
 
-    public function processLogin(Request $request)
+public function processLogin(Request $request)
     {
+        // 1. Validasi Input
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
+        // 2. Coba Login
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+            
+            $user = Auth::user();
 
-            if (Auth::user()->role !== 'siswa') {
+            // 3. LOGIKA REDIRECT BERDASARKAN ROLE
+            if ($user->role === 'admin') {
+                return redirect()->intended(route('admin.dashboard'));
+            } 
+            elseif ($user->role === 'siswa') {
+                return redirect()->intended(route('siswa.dashboard'));
+            }
+            elseif ($user->role === 'tentor') {
+                // Nanti kalau fitur tentor sudah dibuat:
+                // return redirect()->intended(route('tentor.dashboard'));
                 Auth::logout();
-                return back()->withErrors(['email' => 'Akun ini bukan akun siswa.']);
+                return back()->withErrors(['email' => 'Fitur Tentor sedang dalam pengembangan.']);
             }
 
-            return redirect()->intended(route('siswa.dashboard'));
+            // Jika role tidak dikenali
+            Auth::logout();
+            return back()->withErrors(['email' => 'Role akun tidak valid.']);
         }
 
+        // 4. Jika password salah
         return back()->withErrors([
             'email' => 'Email atau password salah.',
         ])->onlyInput('email');

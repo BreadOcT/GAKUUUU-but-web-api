@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    // FR-02: Registrasi Siswa
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -27,23 +26,20 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        // 1. Buat Akun User
         $user = User::create([
             'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'siswa', // Default role siswa
-            'aktif' => true,   // Bisa diset false jika butuh verifikasi email
+            'role' => 'siswa',
+            'aktif' => true,
         ]);
 
-        // 2. Buat Data Profil (Tabel user_data)
         UserData::create([
             'user_id' => $user->id,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name ?? null,
         ]);
 
-        // 3. Buat Token
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -53,7 +49,6 @@ class AuthController extends Controller
         ], 201);
     }
 
-    // FR-01: Login Pengguna
     public function login(Request $request)
     {
         if (!Auth::attempt($request->only('email', 'password'))) {
@@ -76,6 +71,7 @@ class AuthController extends Controller
         Auth::user()->tokens()->delete();
         return response()->json(['message' => 'Logout berhasil']);
     }
+
     public function updateProfile(Request $request)
     {
         $user = Auth::user();

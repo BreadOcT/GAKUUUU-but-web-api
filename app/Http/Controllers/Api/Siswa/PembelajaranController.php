@@ -12,14 +12,29 @@ use Illuminate\Support\Facades\Storage;
 
 class PembelajaranController extends Controller
 {
-    public function dashboard()
+public function dashboard(Request $request)
     {
-        $userId = Auth::id();
-        $enrollments = Enrollment::where('user_id', $userId)
-            ->with(['kelas.matakuliah', 'kelas.jadwal', 'kelas.pengampu.userData'])
+        $user = auth()->user();
+        
+        // Ambil kelas dimana siswa terdaftar (Enrollment)
+        // PENTING: with('kelas.matakuliah.pengampu.userData')
+        $enrollments = Enrollment::with(['kelas.matakuliah.pengampu.userData'])
+            ->where('user_id', $user->id)
+            ->where('status', 'aktif')
             ->get();
 
-        return response()->json(['data' => $enrollments]);
+        // Kita map agar strukturnya langsung jadi list Kelas
+        $dataKelas = $enrollments->map(function($enrollment) {
+            $kelas = $enrollment->kelas;
+            // Hitung modul manual jika withCount belum jalan
+            $kelas->modul_count = $kelas->modul()->count(); 
+            return $kelas;
+        });
+
+        return response()->json([
+            'message' => 'Dashboard data',
+            'data' => $dataKelas
+        ]);
     }
 
     public function show($kelas_id)

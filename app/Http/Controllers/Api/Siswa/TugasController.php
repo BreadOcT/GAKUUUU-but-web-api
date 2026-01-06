@@ -10,6 +10,38 @@ use Illuminate\Support\Facades\Auth;
 
 class TugasController extends Controller
 {
+    public function index($kelasId)
+    {
+        $user = Auth::user();
+
+        $daftarTugas = Tugas::whereHas('materi.modul', function ($query) use ($kelasId) {
+            $query->where('kelas_id', $kelasId);
+        })
+        ->with(['pengumpulan' => function($q) use ($user) {
+            $q->where('user_id', $user->id);
+        }])
+        ->orderBy('deadline', 'asc')
+        ->get();
+
+        $data = $daftarTugas->map(function ($tugas) {
+            $pengumpulan = $tugas->pengumpulan->first();
+            
+            return [
+                'id' => $tugas->id,
+                'judul' => $tugas->judul,
+                'deskripsi' => $tugas->deskripsi,
+                'deadline' => $tugas->deadline ? $tugas->deadline->format('Y-m-d H:i:s') : null,
+                'status_pengumpulan' => $pengumpulan ? $pengumpulan->status : 'belum',
+                'nilai' => $pengumpulan ? $pengumpulan->nilai : null,
+            ];
+        });
+
+        return response()->json([
+            'message' => 'Daftar tugas berhasil diambil',
+            'data' => $data
+        ]);
+    }
+    
     public function submit(Request $request, $tugas_id)
     {
         $request->validate([

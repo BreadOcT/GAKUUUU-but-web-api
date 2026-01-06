@@ -55,6 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/modul/{id}/download', [PembelajaranController::class, 'downloadModul']);
 
         // Tugas
+        Route::get('/kelas/{id}/tugas', [TugasController::class, 'index']);
         Route::post('/tugas/{id}/submit', [TugasController::class, 'submit']); // Upload Tugas
         Route::get('/nilai', [TugasController::class, 'rekapNilai']); // Riwayat Nilai
 

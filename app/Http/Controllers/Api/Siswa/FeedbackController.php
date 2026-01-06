@@ -3,62 +3,63 @@
 namespace App\Http\Controllers\Api\Siswa;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Models\Testimoni;
 use App\Models\KontakCs;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class FeedbackController extends Controller
 {
+    // 1. Simpan Testimoni / Feedback
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'rating' => 'required|integer|min:1|max:5',
-            'komentar' => 'required|string|max:1000',
+        $request->validate([
+            'rating' => 'required|numeric|min:1|max:5',
+            'komentar' => 'required|string', // Database butuh 'komentar', bukan 'ulasan'
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Data tidak valid',
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        $user = Auth::user();
 
-        $testimoni = Testimoni::create([
-            'user_id' => Auth::id(),
+        // Cek apakah user sudah pernah review? (Opsional, kalau mau spam boleh di-skip)
+        // Testimoni::where('user_id', $user->id)->delete(); 
+
+        Testimoni::create([
+            'user_id' => $user->id,
             'rating' => $request->rating,
             'komentar' => $request->komentar,
+            'status' => 'pending', // Default pending agar dimoderasi admin
         ]);
 
         return response()->json([
-            'message' => 'Terima kasih! Feedback Anda berhasil dikirim.',
-            'data' => $testimoni
+            'message' => 'Feedback berhasil dikirim',
         ], 201);
     }
 
+    // 2. Simpan Keluhan CS
     public function kirimKeluhan(Request $request)
     {
         $request->validate([
             'deskripsi_keluhan' => 'required|string',
-            'bukti_keluhan' => 'nullable|image|max:2048',
+            'bukti_keluhan' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
-        $pathBukti = null;
+        $user = Auth::user();
+        $path = null;
+
         if ($request->hasFile('bukti_keluhan')) {
-            $pathBukti = $request->file('bukti_keluhan')->store('bukti_keluhan');
+            $path = $request->file('bukti_keluhan')->store('bukti_keluhan', 'public');
         }
 
-        $keluhan = KontakCs::create([
-            'user_id' => Auth::id(),
+        KontakCs::create([
+            'user_id' => $user->id,
             'deskripsi_keluhan' => $request->deskripsi_keluhan,
-            'bukti_keluhan' => $pathBukti,
+            'bukti_keluhan' => $path,
             'status' => 'pending',
         ]);
 
         return response()->json([
-            'message' => 'Keluhan Anda telah kami terima dan akan segera diproses.',
-            'data' => $keluhan
+            'message' => 'Laporan berhasil dikirim',
         ], 201);
     }
 }

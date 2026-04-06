@@ -16,6 +16,7 @@ use App\Models\Tugas;
 use App\Models\Pengumpulan;
 use App\Models\Testimoni;
 use App\Models\KontakCs;
+use App\Models\MateriProgress;
 use Illuminate\Support\Facades\Storage;  
 
 class PageController extends Controller
@@ -97,21 +98,101 @@ public function processLogin(Request $request)
         return redirect()->route('siswa.dashboard')->with('success', 'Registrasi berhasil! Selamat datang.');
     }
 
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $userId = Auth::id();
         
-        $enrollments = Enrollment::where('user_id', $userId)
+        $query = Enrollment::where('user_id', $userId)
             ->where('status', 'aktif')
-            ->with(['kelas.matakuliah', 'kelas.jadwal', 'kelas.pengampu.userData'])
-            ->get();
+            ->with(['kelas.matakuliah', 'kelas.jadwal', 'kelas.pengampu.userData', 'kelas.modul.materi.tugas']);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('kelas.matakuliah', function($q) use ($search) {
+                $q->where('nama_mk', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('filter')) {
+            if ($request->filter == 'terbaru') {
+                $query->orderBy('created_at', 'desc');
+            } elseif ($request->filter == 'terlama') {
+                $query->orderBy('created_at', 'asc');
+            }
+        }
+
+        $enrollments = $query->get();
+
+        // Ambil SEMUA materi yang sudah selesai oleh user ini untuk dihitung
+        $allCompletedMateriIds = MateriProgress::where('user_id', $userId)->pluck('materi_id')->toArray();
+
+        foreach ($enrollments as $enrollment) {
+            $totalMateri = 0;
+            $totalTugas = 0;
+            $materiSelesai = 0; 
+            $tugasDisubmit = 0;
+
+            foreach ($enrollment->kelas->modul as $modul) {
+                $totalMateri += $modul->materi->count();
+                
+                foreach ($modul->materi as $materi) {
+                    // Cek kelulusan materi
+                    if (in_array($materi->id, $allCompletedMateriIds)) {
+                        $materiSelesai++;
+                    }
+
+                    // Cek kelulusan tugas
+                    if ($materi->tugas) {
+                        $totalTugas++;
+                        $hasSubmitted = \App\Models\Pengumpulan::where('user_id', $userId)
+                                            ->where('tugas_id', $materi->tugas->id)
+                                            ->exists();
+                        if ($hasSubmitted) {
+                            $tugasDisubmit++;
+                        }
+                    }
+                }
+            }
+
+            $totalItem = $totalMateri + $totalTugas;
+            $totalSelesai = $materiSelesai + $tugasDisubmit;
+
+            $enrollment->completion_rate = $totalItem > 0 ? round(($totalSelesai / $totalItem) * 100) : 0;
+        }
 
         return view('siswa.dashboard', compact('enrollments'));
     }
 
-    public function katalog()
+public function katalog(Request $request) // Tambahkan parameter Request
     {
-        $matakuliah = Matakuliah::with('pengampu.userData')->get();
+        // 1. Setup Query Dasar
+        $query = Matakuliah::with('pengampu.userData');
+
+        // 2. Fitur Pencarian (Search by Nama Mata Kuliah)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            // Filter berdasarkan kolom nama_mk di tabel matakuliah
+            $query->where('nama_mk', 'like', "%{$search}%");
+        }
+
+        // 3. Fitur Filter (Pengurutan)
+        if ($request->filled('filter')) {
+            if ($request->filter == 'terbaru') {
+                $query->orderBy('created_at', 'desc');
+            } elseif ($request->filter == 'terlama') {
+                $query->orderBy('created_at', 'asc');
+            } elseif ($request->filter == 'abjad_a_z') {
+                $query->orderBy('nama_mk', 'asc');
+            } elseif ($request->filter == 'abjad_z_a') {
+                $query->orderBy('nama_mk', 'desc');
+            }
+        } else {
+            // Urutan default jika tidak ada filter (opsional)
+            $query->orderBy('created_at', 'desc');
+        }
+
+        // Eksekusi query
+        $matakuliah = $query->get();
         
         return view('siswa.katalog.index', compact('matakuliah'));
     }
@@ -127,21 +208,18 @@ public function processLogin(Request $request)
     {
         $userId = Auth::id();
 
-        $isEnrolled = Enrollment::where('user_id', $userId)
-            ->where('kelas_id', $id)
-            ->exists();
-
+        $isEnrolled = Enrollment::where('user_id', $userId)->where('kelas_id', $id)->exists();
         if (!$isEnrolled) {
             abort(403, 'Anda tidak terdaftar di kelas ini.');
         }
 
-        $kelas = Kelas::with(['modul.materi', 'matakuliah', 'jadwal'])->findOrFail($id);
+        $kelas = Kelas::with(['modul.materi.tugas', 'matakuliah', 'jadwal'])->findOrFail($id);
         
-        $tugasList = Tugas::whereHas('materi.modul', function($q) use ($id) {
-            $q->where('kelas_id', $id);
-        })->get();
+        // AMBIL DATA MATERI YANG SUDAH SELESAI
+        $completedMateriIds = MateriProgress::where('user_id', $userId)->pluck('materi_id')->toArray();
 
-        return view('siswa.kelas.show', compact('kelas', 'tugasList'));
+        // Lempar variabel $completedMateriIds ke view
+        return view('siswa.kelas.show', compact('kelas', 'completedMateriIds'));
     }
 
     public function bacaMateri($id)
@@ -336,5 +414,15 @@ public function processLogin(Request $request)
         $request->session()->regenerateToken();
         
         return redirect('/login');
+    }
+    public function markMateriDone($id)
+    {
+        // Menyimpan data bahwa siswa ini sudah menyelesaikan materi ini
+        MateriProgress::firstOrCreate([
+            'user_id' => Auth::id(),
+            'materi_id' => $id
+        ]);
+
+        return back()->with('success', 'Materi berhasil ditandai selesai!');
     }
 }

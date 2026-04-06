@@ -12,49 +12,52 @@
     <i class="fas fa-info-circle me-2"></i> Selamat datang di <strong>Gaku!</strong> Semangat belajar hari ini.
 </div>
 
+<div class="card mb-4 border-0 shadow-sm">
+    <div class="card-body">
+        <form action="{{ route('siswa.dashboard') }}" method="GET" class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <input type="text" name="search" class="form-control" placeholder="Cari Mata Kuliah..." value="{{ request('search') }}">
+            </div>
+            <div class="col-md-4">
+                <select name="filter" class="form-select">
+                    <option value="">Filter Urutan...</option>
+                    <option value="terbaru" {{ request('filter') == 'terbaru' ? 'selected' : '' }}>Pendaftaran Terbaru</option>
+                    <option value="terlama" {{ request('filter') == 'terlama' ? 'selected' : '' }}>Pendaftaran Terlama</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i> Cari</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="row">
-    @if($enrollments->isEmpty())
-        <div class="col-12 text-center py-5">
-            <img src="https://img.freepik.com/free-vector/no-data-concept-illustration_114360-536.jpg" alt="Kosong" style="width: 200px; opacity: 0.7;">
-            <h5 class="mt-3 text-muted">Anda belum mengambil mata kuliah apapun.</h5>
-            <a href="{{ route('siswa.katalog.index') }}" class="btn btn-primary mt-2">
-                <i class="fas fa-search me-2"></i> Cari Mata Kuliah
-            </a>
-        </div>
-    @else
-        @foreach($enrollments as $enrollment)
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
-                        <span class="badge bg-success float-end">Aktif</span>
-                        <h5 class="card-title fw-bold text-primary">{{ $enrollment->kelas->matakuliah->nama_mk }}</h5>
-                    </div>
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 text-muted">
-                            <i class="fas fa-chalkboard-teacher me-1"></i> 
-                            {{ $enrollment->kelas->nama_kelas }}
-                        </h6>
-                        <p class="card-text small text-secondary">
-                            Tentor: {{ $enrollment->kelas->pengampu->userData->first_name ?? 'Tentor' }}
-                        </p>
-                        
-                        <div class="bg-light p-2 rounded small mb-3">
-                            <i class="far fa-clock me-1"></i> Jadwal:<br>
-                            <strong>
-                                @foreach($enrollment->kelas->jadwal as $jadwal)
-                                    {{ $jadwal->hari }}, {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}<br>
-                                @endforeach
-                            </strong>
+    @foreach($enrollments as $enrollment)
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                    <span class="badge bg-success float-end">Aktif</span>
+                    <h5 class="card-title fw-bold text-primary">{{ $enrollment->kelas->matakuliah->nama_mk }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between small text-muted mb-1">
+                            <span>Progress Belajar</span>
+                            <span>{{ $enrollment->completion_rate }}%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ $enrollment->completion_rate }}%;" aria-valuenow="{{ $enrollment->completion_rate }}" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                     </div>
-                    <div class="card-footer bg-white border-top-0 pb-3">
-                        <a href="{{ route('siswa.kelas.show', $enrollment->kelas->id) }}" class="btn btn-outline-primary w-100">
-                            Masuk Kelas <i class="fas fa-arrow-right ms-1"></i>
-                        </a>
                     </div>
+                <div class="card-footer bg-white border-top-0 pb-3">
+                    <a href="{{ route('siswa.kelas.show', $enrollment->kelas->id) }}" class="btn btn-outline-primary w-100">
+                        Masuk Kelas <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
                 </div>
             </div>
-        @endforeach
-    @endif
+        </div>
+    @endforeach
 </div>
 @endsection

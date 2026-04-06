@@ -30,6 +30,7 @@ Route::middleware(['auth:web', 'role:siswa'])->prefix('siswa')->name('siswa.')->
     Route::post('/feedback', [PageController::class, 'storeFeedback'])->name('feedback.store');
     Route::get('/kontak-cs', [PageController::class, 'createKontakCs'])->name('kontak-cs.create');
     Route::post('/kontak-cs', [PageController::class, 'storeKontakCs'])->name('kontak-cs.store');
+    Route::post('/materi/{id}/mark-done', [PageController::class, 'markMateriDone'])->name('materi.mark_done');
 
 });
 
